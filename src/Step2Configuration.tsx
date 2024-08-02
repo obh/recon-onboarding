@@ -1,149 +1,119 @@
-import React, { useState } from 'react';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
-import { PlusCircle, X } from 'lucide-react';
-import { GatewayConfig } from './Step1Configuration';
-import { PipelineConfig  } from './model';
-
-interface Column {
-    input: String
-    output: String
-}
-
-interface Step2Config {
-    columns: (Column)[]
-}
+import React, { useState } from "react";
+import { ChevronRight, ChevronLeft } from "lucide-react";
+import { PlusCircle, X } from "lucide-react";
+import { GatewayConfig } from "./Step1Configuration";
+import { Column, GatewayRecon, PipelineConfig, RazorpayRecon } from "./model";
+import Field from "./Field";
 
 interface Step2ConfigProps {
-    pipelineConfig: PipelineConfig
-    updatePipelineConfig: Function
+  pipelineConfig: PipelineConfig;
+  updatePipelineConfig: Function;
 }
 
-const Step2Configuration : React.FC<Step2ConfigProps> = ({pipelineConfig, updatePipelineConfig}) => {
-  const [config, updateConfig] = useState<Step2Config>({
-    columns: []
-  });
-  const [newColumn, setNewColumn] = useState<Column>({ input: '', output: '' });
-  const [inputColumnList, updateInputColumnList] = useState<String[]>(pipelineConfig.columns)
+function getGatewayConfig(gatewayName: string): GatewayRecon | null {
+  if (gatewayName == "razorpay") {
+    return new RazorpayRecon();
+  } else if (gatewayName == "cashfree") {
+    return new RazorpayRecon();
+  }
+  return null;
+}
+
+const Step2Configuration: React.FC<Step2ConfigProps> = ({
+  pipelineConfig,
+  updatePipelineConfig,
+}) => {
   const [rawColumn, setRawColumn] = useState(pipelineConfig.rawColumnString);
+  const [inputColumnList, updateInputColumnList] = useState<String[]>([]);
 
-  const nextStep = () => {
-    updatePipelineConfig(undefined, undefined, rawColumn, inputColumnList, config, 1)
-    console.log('next step')
-  }
-  const prevStep = () => {
-    updatePipelineConfig(undefined, undefined, rawColumn, inputColumnList, config, -1)
-    console.log('prev step')
-  }
+  const gatewayConfig = getGatewayConfig(pipelineConfig.gateway);
 
-  const addColumn = () => {
-    console.log("ADDING COLUMN: ", newColumn)
-    if (newColumn.input && newColumn.output) {
-      updateConfig({
-        columns: [...config.columns, newColumn]
-      });
-      setNewColumn({ input: '', output: '' });
+    const nextStep = () => {
+    //   updatePipelineConfig(undefined, undefined, rawColumn, inputColumnMap, config, 1)
+      console.log('next step')
     }
-  };
+    const prevStep = () => {
+    //   updatePipelineConfig(undefined, undefined, rawColumn, inputColumnMap, config, -1)
+      console.log('prev step')
+    }
 
-  const removeColumn = (index : Number) => {
-    updateConfig({
-      columns: config.columns.filter((_, i) => i !== index)
-    });
-  };
-
-  const handleColumnInputChange= (e : any) => {
+  const handleColumnInputChange = (e: any) => {
     setRawColumn(e.target.value);
     // Update the config with the new column names
-    updateInputColumnList(e.target.value.split(',').map((col : any) => col.trim()).filter(Boolean));
+    updateInputColumnList(
+      e.target.value
+        .split(",")
+        .map((col: any) => col.trim())
+        .filter(Boolean)
+    );
   };
 
   return (
     <>
-    <div>
-      <h2 className="text-xl font-semibold mb-4">Step 2: Column Configuration</h2>
-      <div className="mb-4">
-        <label className="block mb-2">Enter Column Names (comma-separated)</label>
-        <input
-          type="text"
-          value={rawColumn}
-          onChange={handleColumnInputChange}
-          className="w-full p-2 border rounded"
-          placeholder="Enter column names, separated by commas"
-        />
-        {rawColumn && (
-          <div className="mt-2 text-sm text-gray-600">
-            Columns: 
-            {inputColumnList.map((col : any, index) => (
-              <span key={index} className="inline-block bg-gray-200 rounded px-2 py-1 mr-1 mb-1">
-                {col}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
+      <div>
+        <h2 className="text-xl font-semibold mb-4">
+          Step 2: Column Configuration
+        </h2>
+        <div className="mb-4">
+            <label className="block mb-2">
+                The following columns are required for Gateway: 
+                <span className="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">
+                    {gatewayConfig?.gateway}
+                </span>
+                <div></div>
+                {gatewayConfig?.columns.map((column: Column, index: number) => (
+                    <div
+                    className="inline-flex items-center justify-between space-x-1 bg-green-100 text-green-800 px-2 py-0.5 rounded-md text-sm">
+                        <div className="select-none">
+                            {column.name} 
+                        </div>
+                    </div>
+                ))}
+            </label>
 
-      <div className="mb-4">
-        <label className="block mb-2">Modify Column</label>
-        <div className="flex space-x-2">
-        <select
-            value={newColumn.input as string}
-            onChange={(e) => setNewColumn({ input: e.target.value, output: newColumn.output })}
-            className="flex-1 p-2 border rounded"
-            >
-            {inputColumnList.map((col : any, index) => (
-                <option key={index} value={col}>
-                {col}
-                </option>
-            ))}
-         </select>
+        </div>
+        <div className="mb-4">
+          <label className="block mb-2">
+            Enter Column Names (comma-separated)
+          </label>
           <input
             type="text"
-            value={newColumn.output as string}    
-            onChange={(e) => setNewColumn({ input: newColumn.input, output: e.target.value})}
-            className="flex-1 p-2 border rounded"
-            placeholder="Output JS expression"
+            value={rawColumn}
+            onChange={handleColumnInputChange}
+            className="w-full p-2 border rounded"
+            placeholder="Enter column names, separated by commas"
           />
-          <button
-            onClick={addColumn}
-            className="bg-blue-500 text-white px-4 py-2 rounded flex items-center"
-          >
-            <PlusCircle size={20} className="mr-2" />
-            Add
-          </button>
+          {rawColumn && (
+            <div className="mt-2 text-sm text-gray-600">
+              Columns:
+              {inputColumnList.map((col, index) => (
+                <Field
+                  name={col as string}
+                  inputList={gatewayConfig?.columns}
+                  updateCallback={handleColumnInputChange}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
-      <div>
-        <h3 className="font-semibold mb-2">Configured Columns:</h3>
-        {config.columns.map((column, index) => (
-          <div key={index} className="flex items-center space-x-2 mb-2">
-            <span className="flex-1">{column.input} → {column.output}</span>
-            <button
-              onClick={() => removeColumn(index)}
-              className="text-red-500"
-            >
-              <X size={20} />
-            </button>
-          </div>
-        ))}
+      <div className="mt-4 flex justify-between">
+        <button
+          onClick={prevStep}
+          className="bg-gray-500 text-white px-4 py-2 rounded flex items-center"
+        >
+          <ChevronLeft size={20} className="mr-2" />
+          Previous
+        </button>
+        <button
+          onClick={nextStep}
+          className="bg-blue-500 text-white px-4 py-2 rounded flex items-center ml-auto"
+        >
+          Next
+          <ChevronRight size={20} className="ml-2" />
+        </button>
       </div>
-    </div>
-     <div className="mt-4 flex justify-between">
-       <button
-         onClick={prevStep}
-         className="bg-gray-500 text-white px-4 py-2 rounded flex items-center"
-       >
-         <ChevronLeft size={20} className="mr-2" />
-         Previous
-       </button>
-       <button
-         onClick={nextStep}
-         className="bg-blue-500 text-white px-4 py-2 rounded flex items-center ml-auto"
-       >
-         Next
-         <ChevronRight size={20} className="ml-2" />
-       </button>
-   </div>
-   </>
+    </>
   );
 };
 

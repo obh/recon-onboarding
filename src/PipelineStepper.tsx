@@ -11,6 +11,7 @@ const PipelineStepper = () => {
   const [pipelineConfig, setPipelineConfig] = useState<PipelineConfig>({
     name: '',
     gateway: '',
+    reconType: '',
     rawColumnString: '',
     columns: [],
     inputTransforms: []
@@ -20,10 +21,11 @@ const PipelineStepper = () => {
     setPipelineConfig((prev) => ({ ...prev, ...newConfig }));
   };
 
-  const updatePipelineConfig = (name: string, gateway: string, rawColumnString: string, columns: [], inputTransformations: [], next: number) => {
+  const updatePipelineConfig = (name: string, gateway: string, reconType: string, rawColumnString: string, columns: [], inputTransformations: [], next: number) => {
     const newPipelineConfig = {
         name: name ? name : pipelineConfig.name,
         gateway: gateway ? gateway : pipelineConfig.gateway,
+        reconType: reconType ? reconType : pipelineConfig.reconType,
         rawColumnString : rawColumnString ? rawColumnString : pipelineConfig.rawColumnString,
         columns : columns ? columns : pipelineConfig.columns,
         inputTransforms : inputTransformations ? inputTransformations : pipelineConfig.inputTransforms

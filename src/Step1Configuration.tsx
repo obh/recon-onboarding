@@ -16,15 +16,16 @@ const Step1Configuration : React.FC<Step1ConfigProps> = ({ pipelineConfig, updat
   
   const [name, updateName] = useState<String>(pipelineConfig.name ? pipelineConfig.name : '')
   const [gateway, updateGateway] = useState<String>(pipelineConfig.gateway ? pipelineConfig.gateway : '')
+  const [reconType, updateReconType] = useState<String>(pipelineConfig.reconType ? pipelineConfig.reconType : '')
 
-  const gateways = ['Gateway A', 'Gateway B', 'Gateway C']; // Replace with actual gateway options
+  const gateways = ['cashfree', 'payu', 'razorpay']; // Replace with actual gateway options
 
   const nextStep = () => {
-    updatePipelineConfig(name, gateway, undefined, undefined, undefined, 1)
+    updatePipelineConfig(name, gateway, reconType, undefined, undefined, undefined, 1)
     console.log('next step')
   }
   const prevStep = () => {
-    updatePipelineConfig(name, gateway, undefined, undefined, undefined, -1)
+    updatePipelineConfig(name, gateway, reconType, undefined, undefined, undefined, -1)
     console.log('prev step')
   }
 
@@ -57,6 +58,17 @@ const Step1Configuration : React.FC<Step1ConfigProps> = ({ pipelineConfig, updat
           ))}
         </select>
       </div>
+      <div className="mb-4">
+        <label className="block mb-2">Select Recon Type</label>
+        <select
+          value={gateway as string}
+          onChange={(e) => updateReconType(e.target.value )}
+          className="w-full p-2 border rounded"
+        >
+          <option value="">Select Recon Type</option>
+          <option key="settlement_recon" value="settlement_recon">Settlement Recon</option>
+        </select>
+      </div>
     </div>
           <div className="mt-4 flex justify-between">
             <button
@@ -73,7 +85,7 @@ const Step1Configuration : React.FC<Step1ConfigProps> = ({ pipelineConfig, updat
               Next
               <ChevronRight size={20} className="ml-2" />
             </button>
-        </div>
+          </div>
         </>
   );
 };
